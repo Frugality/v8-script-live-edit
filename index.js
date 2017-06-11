@@ -1,18 +1,19 @@
 const fs = require('fs');
+const vm = require('vm');
 const nodeModule = require('module');
+const Debug = vm.runInDebugContext('Debug');
 
-if(typeof v8debug !== 'undefined') {
-  const Debug = v8debug.Debug;
+if(Debug) {
   const LiveEdit = Debug.LiveEdit;
-
   const baseMethod = LiveEdit.SetScriptSource;
 
   LiveEdit.SetScriptSource = function(...args) {
     try {
+      /*
       const [script, new_source, preview_only, change_log] = args;
 
-      /*
       console.log(`ScriptId Reloaded: ${script.id}`);
+      console.log(`Changes = ${change_log}`);
 
       Object.getOwnPropertyNames(script).forEach(name => {
         console.log(`script.${name} = ${script[name]}`);
@@ -29,7 +30,7 @@ if(typeof v8debug !== 'undefined') {
       console.error(e);
     }
 
-    baseMethod(...args);
+    return baseMethod(...args);
   }
 
   function escapeRegex(str) {
@@ -68,11 +69,17 @@ if(typeof v8debug !== 'undefined') {
   function reloadScript(filename, contents) {
     let script = Debug.findScript(filename);
     if(script) {
-      //console.log(`Found ${filename} => ${script.id}`);
-      console.log(`Reloading ${filename}`);
+      if(script.source !== contents) {
+        console.log(`Reloading ${filename}`);
 
-      let changes = new Array();
-      LiveEdit.SetScriptSource(script, contents, false, changes);
+        let changes = [];
+        try {
+          LiveEdit.SetScriptSource(script, contents, false, changes);
+        } catch (e) {
+          console.error("LiveEdit exception: " + e);
+          throw e;
+        }
+      }
     }
     else {
       // console.log(`Unable to find ${filename}`);
