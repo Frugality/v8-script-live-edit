@@ -1,10 +1,10 @@
 {
   "name": "v8-script-live-edit",
-  "version": "1.0.0",
+  "version": "0.0.2",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "node --inspect --expose-debug-as=v8debug index"
+    "test": "node -r ./index test/timer.js"
   },
   "author": "",
   "license": "ISC",
