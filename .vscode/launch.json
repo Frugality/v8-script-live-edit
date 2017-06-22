@@ -25,7 +25,7 @@
       },
       "runtimeArgs": [
         "-r",
-        "./index",
+        "./src",
         "test/ts/timer.ts"
       ]
     }

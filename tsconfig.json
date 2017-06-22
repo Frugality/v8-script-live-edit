@@ -1,8 +1,21 @@
 {
   "compilerOptions": {
-    "allowJs": true
+    "outDir": "./build/",
+    "baseUrl": "src",
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "node",
+    "module": "commonjs",
+    "target": "es2017",
+    "allowJs": true,
+    "typeRoots": [
+      "node_modules/@types"
+    ],
+    "lib": ["es6"]
   },
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "build",
+    "test"
   ]
 }

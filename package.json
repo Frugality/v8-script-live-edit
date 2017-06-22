@@ -2,14 +2,18 @@
   "name": "v8-script-live-edit",
   "version": "0.0.2",
   "description": "",
-  "main": "index.js",
+  "main": "build/index.js",
   "scripts": {
-    "test": "node -r ./index test/timer.js"
+    "test": "node -r ./index test/timer.js",
+    "build": "tsc"
   },
   "author": "",
   "license": "ISC",
-  "optionalDependencies": {
-    "ts-node": "^3.1.0",
-    "typescript": "^2.3.4"
+  "peerDependencies": {
+    "ts-node": "^3.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^2.3.4",
+    "@types/node": "^8.0.1"
   }
 }
