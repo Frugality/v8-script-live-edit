@@ -2,35 +2,18 @@ const fs = require('fs');
 const vm = require('vm');
 const nodeModule = require('module');
 const Debug = vm.runInDebugContext('Debug');
+let tsNode;
+
 
 if(Debug) {
   const LiveEdit = Debug.LiveEdit;
   const baseMethod = LiveEdit.SetScriptSource;
 
-  LiveEdit.SetScriptSource = function(...args) {
-    try {
-      /*
-      const [script, new_source, preview_only, change_log] = args;
-
-      console.log(`ScriptId Reloaded: ${script.id}`);
-      console.log(`Changes = ${change_log}`);
-
-      Object.getOwnPropertyNames(script).forEach(name => {
-        console.log(`script.${name} = ${script[name]}`);
-      });
-      */
-
-      /*
-      fs.writeFile('/tmp/test.js', unwrapModule(new_source), 'utf-8', (err) => {
-        console.log(`wrote ${script.name} /tmp/test.js`);
-      });
-      */
-    }
-    catch(e) {
-      console.error(e);
-    }
-
-    return baseMethod(...args);
+  try {
+    tsNode = require('ts-node');
+  }
+  catch(e) {
+    console.error(e);
   }
 
   function escapeRegex(str) {
@@ -74,7 +57,24 @@ if(Debug) {
 
         let changes = [];
         try {
-          LiveEdit.SetScriptSource(script, contents, false, changes);
+          let result = LiveEdit.SetScriptSource(script, contents, false, changes);
+
+          changes.forEach(change => {
+            if(change.function_patched !== undefined) {
+              if(change.function_info_not_found) {
+                console.log(`\t⛔ ${change.function_patched}`);
+              }
+              else {
+                console.log(`\t✅ ${change.function_patched}`);
+              }
+            }
+            else if(change.position_patched || change.linked_to_old_script) {
+              // do nothing
+            }
+            else {
+              console.log(JSON.stringify(change));
+            }
+          })
         } catch (e) {
           console.error("LiveEdit exception: " + e);
           throw e;
@@ -86,11 +86,17 @@ if(Debug) {
     }
   }
 
-  function reloadModule(filename) {
-    const contents = fs.readFileSync(filename, 'utf-8');
-    const wrapped = nodeModule.wrap(contents);
+  let register = tsNode ? tsNode.register({fast: true, allowJs: true, ignoreWarnings: true, target: 'es2017'}) : null;
 
-    reloadScript(filename, wrapped);
+  function reloadModule(module, filename) {
+    let contents = fs.readFileSync(filename, 'utf-8');
+
+    if(register) {
+      contents = register.compile(contents, filename);
+    }
+    contents = nodeModule.wrap(contents);
+
+    reloadScript(filename, contents);
   }
 
   const watching = {};
@@ -104,7 +110,7 @@ if(Debug) {
       // console.log(`Watching ${module.id}`);
       fs.watch(filename, {persistent: false}, (eventType, eventFilename) => {
         // console.log(`Module ${filename} changed. Event=${eventType} ${filename}`);
-        reloadModule(filename);
+        reloadModule(module, filename);
       })
     }
   }

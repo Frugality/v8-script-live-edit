@@ -13,6 +13,21 @@
       "runtimeArgs": [
        "-r", "./index"
       ]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "protocol": "inspector",
+      "name": "Launch w/ ts-node",
+      "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/ts-node",
+      "windows": {
+        "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/ts-node.cmd"
+      },
+      "runtimeArgs": [
+        "-r",
+        "./index",
+        "test/ts/timer.ts"
+      ]
     }
   ]
 }
