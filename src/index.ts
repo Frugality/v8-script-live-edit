@@ -18,7 +18,7 @@ const EmojiText = {
   FUNCTION_RELOADED: '✅',
   FUNCTION_NOT_RELOADED: '⛔',
 }
-const Text = EnglishText;
+const Text = EmojiText;
 
 class ScriptLiveEdit {
   tsCompiler: any;
