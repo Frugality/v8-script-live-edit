@@ -4,7 +4,7 @@ const fs = require("fs");
 const vm = require("vm");
 const path = require("path");
 const ModuleWrapper = require("./wrapper");
-const tsNode = require("ts-node");
+const typescript = require("typescript");
 const Debug = vm.runInDebugContext('Debug');
 const EnglishText = {
     FILE_RELOADED: 'Reloading',
@@ -19,15 +19,30 @@ const EmojiText = {
 const Text = EmojiText;
 class ScriptLiveEdit {
     constructor() {
-        this.tsCompiler = tsNode ? tsNode.register({ fast: true, allowJs: true, ignoreWarnings: true, target: 'es2017' }) : null;
+        this.compilerOptions = {
+            fast: true,
+            allowJs: true,
+            ignoreWarnings: true,
+            target: typescript.ScriptTarget.ES2017,
+            inlineSourceMap: true,
+            moduleResolution: typescript.ModuleResolutionKind.NodeJs,
+            module: typescript.ModuleKind.CommonJS
+        };
     }
     reloadModule(module, filename) {
-        let contents = fs.readFileSync(filename, 'utf-8');
-        if (this.tsCompiler) {
-            contents = this.tsCompiler.compile(contents, filename);
-        }
-        contents = ModuleWrapper.wrap(contents);
-        this.updateScriptContents(filename, contents);
+        fs.readFile(filename, 'utf-8', (err, contents) => {
+            if (contents.length > 0) {
+                let ext = path.extname(filename);
+                let tsOptions = {
+                    fileName: filename,
+                    compilerOptions: this.compilerOptions,
+                    reportDiagnostics: true
+                };
+                let output = typescript.transpileModule(contents, tsOptions);
+                contents = ModuleWrapper.wrap(output.outputText);
+                this.updateScriptContents(filename, contents);
+            }
+        });
     }
     updateScriptContents(filename, contents) {
         const LiveEdit = Debug.LiveEdit;

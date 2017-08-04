@@ -2,8 +2,7 @@ import * as fs from 'fs';
 import * as vm from 'vm';
 import * as path from 'path';
 import ModuleWrapper = require('./wrapper');
-
-import * as tsNode from 'ts-node';
+import * as typescript from 'typescript'
 
 const Debug = vm.runInDebugContext('Debug');
 
@@ -21,22 +20,38 @@ const EmojiText = {
 const Text = EmojiText;
 
 class ScriptLiveEdit {
-  tsCompiler: any;
+  compilerOptions: typescript.CompilerOptions;
 
   constructor() {
-    this.tsCompiler = tsNode ? tsNode.register({fast: true, allowJs: true, ignoreWarnings: true, target: 'es2017'}) : null;
+    this.compilerOptions = { 
+      fast: true, 
+      allowJs: true,
+      ignoreWarnings: true, 
+      target: typescript.ScriptTarget.ES2017,
+      inlineSourceMap: true,
+      moduleResolution: typescript.ModuleResolutionKind.NodeJs,
+      module: typescript.ModuleKind.CommonJS
+    };
   }
 
   reloadModule(module : NodeModule, filename : string) {
-    let contents = fs.readFileSync(filename, 'utf-8');
+    fs.readFile(filename, 'utf-8', (err, contents) => {
+      if (contents.length > 0) {
+        let ext = path.extname(filename);
 
-    if(this.tsCompiler) {
-      contents = this.tsCompiler.compile(contents, filename);
-    }
+        let tsOptions: typescript.TranspileOptions = {
+          fileName: filename,
+          compilerOptions: this.compilerOptions,
+          reportDiagnostics: true
+        };
 
-    contents = ModuleWrapper.wrap(contents);
+        let output = typescript.transpileModule(contents, tsOptions);
 
-    this.updateScriptContents(filename, contents);
+        contents = ModuleWrapper.wrap(output.outputText);
+
+        this.updateScriptContents(filename, contents);
+      }
+    });
   }
 
   updateScriptContents(filename : string, contents : string) {

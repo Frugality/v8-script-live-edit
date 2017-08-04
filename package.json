@@ -5,15 +5,15 @@
   "main": "build/index.js",
   "scripts": {
     "test": "node -r ./index test/timer.js",
-    "build": "tsc"
+    "build": "tsc",
+    "watch": "tsc -w"
   },
   "author": "",
   "license": "ISC",
   "peerDependencies": {
-    "ts-node": "^3.1.0"
+    "typescript": "^2"
   },
   "devDependencies": {
-    "typescript": "^2.3.4",
     "@types/node": "^8.0.1"
   }
 }
