@@ -1,8 +1,9 @@
 import * as fs from 'fs';
 import * as vm from 'vm';
 import * as path from 'path';
-import ModuleWrapper = require('./wrapper');
 import * as typescript from 'typescript'
+
+import ModuleWrapper = require('./wrapper');
 
 const Debug = vm.runInDebugContext('Debug');
 
@@ -99,24 +100,43 @@ class ScriptLiveEdit {
     })
   }
 }
+async function stat(filename: string): Promise<number> {
+  return new Promise<number>((resolve, reject) => {
+    fs.stat(filename, (err, stats) => {
+      if (stats) {
+        resolve(stats.mtime.getTime());
+      } else {
+        reject();
+      }
+    });
+  });
+}
 
 class ScriptWatcher {
-  watching: {};
+  modified: { [name: string] : number };
 
   constructor() {
-    this.watching = {};
+    this.modified = {};
   }
 
-  watch(module : NodeModule) {
+  async watch(module : NodeModule) {
     const filename = module.filename;
 
-    if(this.watching[filename] === undefined) {
-      this.watching[filename] = 1;
+    if(this.modified[filename] === undefined) {
+      // placeholder while we wait for the stat
+      this.modified[filename] = 0.0;
+      // get the real mtime
+      this.modified[filename] = await stat(filename);
 
       // console.log(`Watching ${module.id}`);
-      fs.watch(filename, {persistent: false}, (eventType, eventFilename) => {
+      fs.watch(filename, {persistent: false}, async (eventType, eventFilename) => {
         // console.log(`Module ${filename} changed. Event=${eventType} ${filename}`);
-        this.changed(module, filename);
+        let mtime = await stat(filename);
+
+        if(mtime !== this.modified[filename]) {
+          this.modified[filename] = mtime;
+          this.changed(module, filename);
+        }
       })
     }
   }
