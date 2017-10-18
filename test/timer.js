@@ -1,5 +1,5 @@
 function print() {
-	console.log(`Tmze = ${Date.now()}`);
+	console.log(`Time = ${Date.now()}`);
 }
 
 setInterval(print, 2000);

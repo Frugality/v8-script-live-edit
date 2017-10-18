@@ -11,7 +11,7 @@
       "name": "Launch Program",
       "program": "${workspaceRoot}/test/timer.js",
       "runtimeArgs": [
-       "-r", "./index"
+       "-r", "./build/index"
       ]
     },
     {

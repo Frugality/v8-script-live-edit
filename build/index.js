@@ -56,7 +56,7 @@ class ScriptLiveEdit {
             }
             catch (e) {
                 console.error("LiveEdit exception: " + e);
-                throw e;
+                // throw e;
             }
         }
     }
