@@ -2,7 +2,7 @@
   "name": "v8-script-live-edit",
   "version": "0.0.5",
   "description": "",
-  "main": "build/index.js",
+  "main": "build_js/index.js",
   "scripts": {
     "test": "node -r ./index test/timer.js",
     "install": "node-gyp rebuild",

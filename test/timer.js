@@ -1,5 +1,5 @@
 function print() {
-	console.log(`Time = ${Date.now()}`);
+	console.log(`ssszme = ${Date.now()}`);
 }
 
 setInterval(print, 2000);

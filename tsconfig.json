@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "./build/",
+    "outDir": "./build_js/",
     "baseUrl": "src",
     "sourceMap": true,
     "declaration": false,
@@ -16,6 +16,7 @@
   "exclude": [
     "node_modules",
     "build",
+    "build_js",
     "test"
   ]
 }
