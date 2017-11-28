@@ -146,6 +146,24 @@ class ScriptWatcher {
     }
     changed(module, filename) { }
 }
+class NativeExtension {
+    static get isRequired() {
+        const [major, minor, patch] = process.version.substring(1).split('.').map(x => Number(x));
+        return (major == 8 && minor > 2);
+    }
+    static load() {
+        let liveEdit = require('bindings')('live_edit');
+        if (liveEdit) {
+            liveEdit.setLiveEditEnabled(true);
+            return true;
+        }
+        return false;
+    }
+}
+let native = false;
+if (NativeExtension.isRequired) {
+    native = NativeExtension.load();
+}
 if (Debug) {
     const watcher = new ScriptWatcher();
     watcher.watchLoaded();
@@ -154,6 +172,7 @@ if (Debug) {
     watcher.changed = (module, filename) => {
         reloader.reloadModule(module, filename);
     };
-    console.log("Script Live Edit Activated");
+    let nativeMessage = native ? 'w/ Native Extension' : '';
+    console.log(`Script LiveEdit Activated ${nativeMessage}`);
 }
 //# sourceMappingURL=index.js.map
